@@ -2,7 +2,7 @@
 #include <stdbool.h> // kan gjøre lage variabler med (bool isTrue = true;), for print er det 1 eller 0 (%i)
 #include <stdlib.h> // inneholder malloc
 
- //yo
+ //yo tester igjen
 int main()
 {
     int x, y;
