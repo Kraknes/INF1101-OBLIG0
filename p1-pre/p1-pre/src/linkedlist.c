@@ -32,23 +32,42 @@ struct list_iter {
 
 
 list_t *list_create(cmp_fn cmpfn) {
-
+    list_t *list = malloc(sizeof(list_t));
+    list->head = NULL;
+    list->tail  = NULL;
+    list->length = 0;
+    list->cmpfn = cmpfn;
 }
 
 void list_destroy(list_t *list, free_fn item_free) {
+    free(list);
+    printf("list destroyed \n");
 
 }
 
 size_t list_length(list_t *list) {
+    if (list->length == 0) {
+        return 0;
+    }
+    return list->length;
 
 }
 
 int list_addfirst(list_t *list, void *item) {
-    
+    lnode_t *first_node = malloc(sizeof(lnode_t));
+    first_node->item = item;
+    first_node->next = list->head;
+    list->head = first_node;
+    list->length++;
+
 }
 
 int list_addlast(list_t *list, void *item) {
-    
+    lnode_t *last_node = malloc(sizeof(lnode_t));
+    last_node->item = item;
+    last_node->next = NULL;
+    list->tail->next = last_node;
+    list->tail = last_node;
 }
 
 void *list_popfirst(list_t *list) {
@@ -60,7 +79,14 @@ void *list_poplast(list_t *list) {
 }
 
 int list_contains(list_t *list, void *item) {
-    
+    if (!list) {
+        return 0;
+    }
+    for (lnode_t *n = list->head; n != NULL; n = n->next) {
+        if (list->cmpfn(n->item, item) == 0) {
+            return 1;
+        }
+    }
 }
 
 
