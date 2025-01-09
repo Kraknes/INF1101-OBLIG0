@@ -60,7 +60,7 @@ void list_destroy(list_t *list, free_fn item_free) {
 
 }
 
-// funker
+// FUNKER
 int list_addfirst(list_t *list, void *item) {
     lnode_t *first_node = malloc(sizeof(lnode_t));
     first_node->item = item;
@@ -70,6 +70,7 @@ int list_addfirst(list_t *list, void *item) {
         list->head = first_node;
     }
     else {
+        list->head->prev = first_node;
         first_node->next = list->head;
         list->head = first_node;
     }
@@ -78,11 +79,11 @@ int list_addfirst(list_t *list, void *item) {
     return 0;
 }
 
-// funker
+// FUNKER
 int list_addlast(list_t *list, void *item) {
     lnode_t *last_node = malloc(sizeof(lnode_t));
     last_node->item = item;
-    last_node->next = NULL;
+    last_node->prev = list->tail;
     list->tail->next = last_node;
     list->tail = last_node;
     
@@ -90,30 +91,96 @@ int list_addlast(list_t *list, void *item) {
     return 0;
 }
 
+// FUNKER
+void *list_popfirst(list_t *list) {
+
+    printf("\n~~~ LISTPOP_FIRST TEST ~~~\n");
+
+    if (list->head == NULL){
+        printf("No head available");
+        return NULL;
+    }
+    lnode_t *tmp_node = list->head;
+    if (list->head == tmp_node){
+        printf("GODKJENT: head og temp er lik\n");
+    }
+    if (list->head->item == tmp_node->item) {
+        printf("GODKJENT: items i head og tmp er lik\n");
+    }
+
+    void *tmp_item = tmp_node->item;
+    if (tmp_item == NULL){
+        printf("Head has no item");
+        return NULL;
+    }
+
+    list->head = list->head->next;
+    free(tmp_node);
+    tmp_node = NULL;
+    if (tmp_node == NULL)
+    {
+        printf("GODKJENT: head har blitt slettet\n");
+    }
+    
+    list->length--;
+    printf("Test av temp item: %s\n", (char *)tmp_item);
+    return tmp_item;
+}
+// funker OK, men har ikke implementert node->prev som kunne gjort ting enklere
+void *list_poplast(list_t *list) {
+    if (!list->tail)
+    {
+        return NULL;
+    }
+    
+    lnode_t *tmp_node = list->tail;
+    void *tmp_item = list->tail->item;
+    list->length--;
+
+    lnode_t *tmp_node2 = list->head;
+    for (int i = 1; i < list->length; i++){
+        tmp_node2 = list->head->next;
+    }
+    list->tail = tmp_node2;
+    return tmp_item;
+
+
+}
 
 int main(){
     printf("yo \n");
 
+    printf("~~~~ LIST CREATION TEST ~~~~\n");
     list_t *list = list_create((cmp_fn) strcmp);
     printf("List length before nodes is: %lu \n", list->length);
     list_addfirst(list, "dette er første node lagt til head");
     list_addfirst(list, "dette er andre node lagt til head");
     printf("List length after two head nodes added is: %lu \n", list->length);
 
+    printf("\n~~~~ HEADNODES TEST ~~~~\n");
     printf("Memory adress for head is: %p \n", list->head);
     printf("Item for head is: %s \n", (char *)list->head->item);
     printf("Memory adress for node nr.2 is: %p \n", list->head->next);
-    printf("Item for tail si: %s \n", (char *)list->head->next->item);
+    printf("Item for tail is: %s \n", (char *)list->head->next->item);
 
+    printf("\n~~~~ TAILNODES TEST ~~~~\n");
     list_addlast(list, "tredje node lagt til listen til tail");
     printf("Memory adress for tail is: %p \n", list->tail);
     printf("Item for tail si: %s \n", (char *)list->tail->item);
     printf("List length after two head nodes and one tail added is: %lu \n", list->length);
 
-    printf("size of list before destruction: %lu \n", sizeof(list));
+    printf("\n~~~~ HEADNODES DELETE TEST ~~~~\n");
+    printf("Head item før sletting: %s \n", (char *)list->head->item);
+    list_popfirst(list);
+    printf("Head tail item etter sletting: %s\n", (char *)list->head->item);
+    printf("List length after two head nodes and one tail added is: %lu \n", list->length);
+
+    printf("\n~~~~ LIST DELETION TEST ~~~~\n");
+    printf("Size of list before destruction: %lu \n", sizeof(list));
     list_destroy(list, NULL);
     printf("size of list after destruction: %lu \n", sizeof(list));
     // printf("Does list exist? Testing head item: %s", (char *)list->head->item);
     printf("Does list exist?: %p \n", list);
+    printf("Does list tail item exist?: %s \n", (char *)list->tail->item);
     return 0;
 }
