@@ -119,7 +119,7 @@ void *list_popfirst(list_t *list) {
     tmp_node = NULL;
     if (tmp_node == NULL)
     {
-        printf("GODKJENT: head har blitt slettet\n");
+        printf("GODKJENT: HEAD har blitt slettet\n");
     }
     
     list->length--;
@@ -128,24 +128,64 @@ void *list_popfirst(list_t *list) {
 }
 // funker OK, men har ikke implementert node->prev som kunne gjort ting enklere
 void *list_poplast(list_t *list) {
+    printf("\n~~~ LISTPOP_LAST TEST ~~~\n");
     if (!list->tail)
     {
+        printf("FAILURE: Listen har ikke tail \n");
         return NULL;
     }
     
     lnode_t *tmp_node = list->tail;
     void *tmp_item = list->tail->item;
     list->length--;
-
-    lnode_t *tmp_node2 = list->head;
-    for (int i = 1; i < list->length; i++){
-        tmp_node2 = list->head->next;
+    printf("Dette er TAIL før sletting:\t %s\n", (char *)list->tail->item);
+    list->tail = list->tail->prev;
+    free(tmp_node);
+    tmp_node = NULL;
+    
+    if (tmp_node == NULL)
+    {
+        printf("GODKJENT: TAIL har blitt slettet\n");
     }
-    list->tail = tmp_node2;
-    return tmp_item;
-
-
+    printf("Dette er TAIL etter sletting:\t %s\n", (char *)list->tail->item);
+    return tmp_item;    
 }
+
+int list_contains(list_t *list, void *item) {
+    printf("\n~~~ LIST_CONTAINS TEST ~~~\n");
+    if (!list) {
+        printf("FAILURE: Liste eksistere ikke\n");
+        return 0;
+    }
+    lnode_t *node_cmp = list->head;
+    for (size_t i=1; i <= list->length; i++)
+    {
+        if (list->cmpfn(item, node_cmp->item) == 0)
+        {
+            printf("SUCCESS: Funnet likhet\n");
+            return 1;
+        }
+        else {
+            printf("Likhet ikke funnet, fortsetter videre\n");
+            printf("i = %li\n", i);
+            node_cmp = node_cmp->next;
+        }
+        
+    }
+    
+    // for (lnode_t *n = list->head; n != NULL; n = n->next) {
+    //     if (list->cmpfn(n->item, item) == 0) {
+    //         return 1;
+    //     }
+    printf("FAILURE: Ingen likheter funnet");
+    return 0;
+    // }
+}
+
+void list_sort(list_t *list) {
+    return;
+}
+
 
 int main(){
     printf("yo \n");
@@ -169,11 +209,15 @@ int main(){
     printf("Item for tail si: %s \n", (char *)list->tail->item);
     printf("List length after two head nodes and one tail added is: %lu \n", list->length);
 
+    list_contains(list, list->tail->item);
+
     printf("\n~~~~ HEADNODES DELETE TEST ~~~~\n");
     printf("Head item før sletting: %s \n", (char *)list->head->item);
     list_popfirst(list);
     printf("Head tail item etter sletting: %s\n", (char *)list->head->item);
     printf("List length after two head nodes and one tail added is: %lu \n", list->length);
+
+    list_poplast(list);
 
     printf("\n~~~~ LIST DELETION TEST ~~~~\n");
     printf("Size of list before destruction: %lu \n", sizeof(list));
@@ -182,5 +226,7 @@ int main(){
     // printf("Does list exist? Testing head item: %s", (char *)list->head->item);
     printf("Does list exist?: %p \n", list);
     printf("Does list tail item exist?: %s \n", (char *)list->tail->item);
+
+    
     return 0;
 }
