@@ -182,8 +182,58 @@ int list_contains(list_t *list, void *item) {
     // }
 }
 
-void list_sort(list_t *list) {
-    return;
+list_iter_t *list_createiter(list_t *list) {
+    printf("\n ~~~~ LIST ITER TEST ~~~~ \n");
+    list_iter_t *iter = malloc(sizeof(list_iter_t));
+    iter->node = list->head;
+    iter->list = list;
+    if (!iter){
+        printf("FAILURE: No iter created\n");
+        return NULL;
+    }
+    else {
+        printf("SUCCESS, Iter created if memory adresses are alike: %p ", iter);
+        return iter;
+    }
+
+}
+
+void list_destroyiter(list_iter_t *iter) {
+    printf("\n ~~~~ ITER DESTROY TEST ~~~~\n");
+    if (!iter){
+        printf("FAILURE: No iter to destroy");
+        return NULL;
+    }
+    free(iter);
+    iter = NULL;
+    printf("SUCCESS: Iter destroyed\n");
+}
+
+int list_hasnext(list_iter_t *iter) {
+    if (!iter->node)
+    {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
+
+void *list_next(list_iter_t *iter) {
+    char *tmp = iter->node->item;
+    iter->node = iter->node->next;
+    return tmp;
+}
+
+void list_resetiter(list_iter_t *iter) {
+    if (!iter->list->head)
+    {
+        printf("FAILURE: List has no head to restart\n");
+        return NULL;
+    }
+    
+    iter->node = iter->list->head;
+    printf("SUCCESS: Iter has been reseted\n");
 }
 
 
@@ -209,7 +259,40 @@ int main(){
     printf("Item for tail si: %s \n", (char *)list->tail->item);
     printf("List length after two head nodes and one tail added is: %lu \n", list->length);
 
-    list_contains(list, list->tail->item);
+    int test = list_contains(list, list->tail->item);
+    printf("Hvis tallet er 1, virker list_contains: %d\n", test);
+
+    list_iter_t *iter = list_createiter(list);
+    printf("%p\n", iter);
+
+    printf("\n ~~~~ TEST AV ITERATOR ~~~~\n");
+    printf("LISTLENGTH: %lu\n", list->length);
+    int testiter = 9;
+    int reset = 0;
+    for (size_t i = 1; i <= list->length; i++)
+    {   
+        if (!list_hasnext(iter) == 0){
+            char *node_str = list_next(iter);
+            printf("Tekst av node nr.%ld: %s\n", i, (char *)node_str);
+            reset++;
+        }
+        if (list_hasnext(iter) == 0){
+            printf("Listen er exhausted, må resetes!\n");
+            list_resetiter(iter);
+            i = 0;
+            
+        }
+ 
+    if (reset == testiter){
+        printf("SUCCESS: Reset test av iter fullført\n");
+        i = 4;
+    }
+    }
+    
+    
+
+    list_destroyiter(iter);
+    
 
     printf("\n~~~~ HEADNODES DELETE TEST ~~~~\n");
     printf("Head item før sletting: %s \n", (char *)list->head->item);
