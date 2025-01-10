@@ -41,8 +41,7 @@ list_t *list_create(cmp_fn cmpfn) {
 
 void list_destroy(list_t *list, free_fn item_free) {
     free(list);
-    printf("list destroyed \n");
-
+    free(item_free);
 }
 
 size_t list_length(list_t *list) {
@@ -55,61 +54,145 @@ size_t list_length(list_t *list) {
 
 int list_addfirst(list_t *list, void *item) {
     lnode_t *first_node = malloc(sizeof(lnode_t));
+    if (first_node == NULL)
+    {
+        printf("\nERROR: Failed to allocate memory to new node to head");
+        return -1;
+    }
+    
     first_node->item = item;
-    first_node->next = list->head;
-    list->head = first_node;
+    if (list->length == 0) {
+        list->tail = first_node;
+        list->head = first_node;
+    }
+    else {
+        list->head->prev = first_node;
+        first_node->next = list->head;
+        list->head = first_node;
+    }
     list->length++;
-
+    return 0;
 }
 
 int list_addlast(list_t *list, void *item) {
     lnode_t *last_node = malloc(sizeof(lnode_t));
+    if (last_node == NULL)
+    {
+        printf("\nERROR: Failed to allocate memory to new node to tail");
+        return -1;
+    }
     last_node->item = item;
-    last_node->next = NULL;
+    last_node->prev = list->tail;
     list->tail->next = last_node;
     list->tail = last_node;
+    list->length++;
+    return 0;
 }
 
 void *list_popfirst(list_t *list) {
-    
-}
+    if (list->head == NULL){
+        printf("\nERROR: List has no head");
+        exit(EXIT_FAILURE);
+    }
+    lnode_t *tmp_node = list->head;
+    if (tmp_node == NULL){
+        printf("\nERROR: Failed to allocate memory to temporary item");
+        exit(EXIT_FAILURE);
+    }
+    void *tmp_item = tmp_node->item;
+    list->head = list->head->next;
+    free(tmp_node);
+    tmp_node = NULL;
+    list->length--;
+    return tmp_item;
+} 
 
 void *list_poplast(list_t *list) {
-    
+    if (list->tail == NULL)
+    {
+        printf("\nERROR: List has no tail");
+        return NULL;
+    }
+    lnode_t *tmp_node = list->tail;
+    void *tmp_item = list->tail->item;
+    list->tail = list->tail->prev;
+    free(tmp_node);
+    tmp_node = NULL;
+    list->length--;
+    return tmp_item;    
 }
 
 int list_contains(list_t *list, void *item) {
     if (!list) {
+        printf("\nERROR: List does not exist");
         return 0;
     }
-    for (lnode_t *n = list->head; n != NULL; n = n->next) {
-        if (list->cmpfn(n->item, item) == 0) {
+    lnode_t *node_cmp = list->head;
+    for (size_t i=1; i <= list->length; i++)
+    {
+        if (list->cmpfn(item, node_cmp->item) == 0)
+        {
             return 1;
         }
+        else {
+            node_cmp = node_cmp->next;
+        }
+        
     }
+    printf("FAILURE: Ingen likheter funnet");
+    return 0;
 }
 
 
 /* ---- list iterator ---- */
 
 list_iter_t *list_createiter(list_t *list) {
+    list_iter_t *iter = malloc(sizeof(list_iter_t));
+    iter->node = list->head;
+    iter->list = list;
+    if (!iter){
+        printf("\nERROR: No iter created");
+        return NULL;
+    }
+    else {
+        return iter;
+    }
 
 }
 
 void list_destroyiter(list_iter_t *iter) {
-
+    if (!iter){
+        printf("\nERROR: No iter to destroy");
+        return NULL;
+    }
+    free(iter);
+    iter = NULL;
 }
 
 int list_hasnext(list_iter_t *iter) {
-
+    if (!iter->node)
+    {
+        return 0;
+    }
+    else {
+        return 1;
+    }
 }
 
 void *list_next(list_iter_t *iter) {
-
+    char *tmp = iter->node->item;
+    iter->node = iter->node->next;
+    return tmp;
 }
 
 void list_resetiter(list_iter_t *iter) {
-
+    if (!iter->list->head)
+    {
+        printf("\nERROR: List has no head to restart");
+        return NULL;
+    }
+    
+    iter->node = iter->list->head;
 }
 
 
@@ -189,6 +272,7 @@ static lnode_t *mergesort_(lnode_t *head, cmp_fn cmpfn) {
     if (head->next == NULL) {
         return head;
     }
+
 
     lnode_t *half = splitlist(head);
     head = mergesort_(head, cmpfn);
