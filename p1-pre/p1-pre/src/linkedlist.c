@@ -34,9 +34,11 @@ struct list_iter {
 list_t *list_create(cmp_fn cmpfn) {
     list_t *list = malloc(sizeof(list_t));
     list->head = NULL;
-    list->tail  = NULL;
+    list->tail = NULL;
     list->length = 0;
     list->cmpfn = cmpfn;
+    printf("Test");
+    return list;
 }
 
 void list_destroy(list_t *list, free_fn item_free) {
@@ -123,7 +125,7 @@ void *list_poplast(list_t *list) {
 }
 
 int list_contains(list_t *list, void *item) {
-    if (!list) {
+    if (list == NULL) {
         printf("\nERROR: List does not exist");
         return 0;
     }
@@ -150,7 +152,7 @@ list_iter_t *list_createiter(list_t *list) {
     list_iter_t *iter = malloc(sizeof(list_iter_t));
     iter->node = list->head;
     iter->list = list;
-    if (!iter){
+    if (iter == NULL){
         printf("\nERROR: No iter created");
         return NULL;
     }
@@ -161,16 +163,15 @@ list_iter_t *list_createiter(list_t *list) {
 }
 
 void list_destroyiter(list_iter_t *iter) {
-    if (!iter){
+    if (iter == NULL){
         printf("\nERROR: No iter to destroy");
-        return NULL;
     }
     free(iter);
     iter = NULL;
 }
 
 int list_hasnext(list_iter_t *iter) {
-    if (!iter->node)
+    if (iter->node  == NULL)
     {
         return 0;
     }
@@ -186,10 +187,9 @@ void *list_next(list_iter_t *iter) {
 }
 
 void list_resetiter(list_iter_t *iter) {
-    if (!iter->list->head)
+    if (iter->list->head == NULL)
     {
         printf("\nERROR: List has no head to restart");
-        return NULL;
     }
     
     iter->node = iter->list->head;
@@ -285,11 +285,11 @@ void list_sort(list_t *list) {
     /* Recursively sort the list */
     list->head = mergesort_(list->head, list->cmpfn);
 
-    // /* Fix the tail and prev links */
-    // lnode_t *prev = NULL;
-    // for (lnode_t *n = list->head; n != NULL; n = n->next) {
-    //     n->prev = prev;
-    //     prev = n;
-    // }
-    // list->tail = prev;
+    /* Fix the tail and prev links */
+    lnode_t *prev = NULL;
+    for (lnode_t *n = list->head; n != NULL; n = n->next) {
+        n->prev = prev;
+        prev = n;
+    }
+    list->tail = prev;
 }
