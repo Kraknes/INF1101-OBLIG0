@@ -37,7 +37,6 @@ list_t *list_create(cmp_fn cmpfn) {
     list->tail = NULL;
     list->length = 0;
     list->cmpfn = cmpfn;
-    printf("Test");
     return list;
 }
 
