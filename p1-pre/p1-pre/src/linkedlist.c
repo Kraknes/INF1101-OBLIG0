@@ -76,17 +76,24 @@ int list_addfirst(list_t *list, void *item) {
 }
 
 int list_addlast(list_t *list, void *item) {
-    lnode_t *last_node = malloc(sizeof(lnode_t));
+    lnode_t *last_node = malloc(sizeof(lnode_t)); 
     if (last_node == NULL)
     {
         printf("\nERROR: Failed to allocate memory to new node to tail");
         return -1;
     }
     last_node->item = item;
-    last_node->prev = list->tail;
-    list->tail->next = last_node;
-    list->tail = last_node;
-    list->length++;
+    if (list->length == 0){
+        list->head = last_node;
+        list->tail = last_node;
+        list->length++;
+    }
+    else{ 
+        last_node->prev = list->tail;
+        list->tail->next = last_node;
+        list->tail = last_node;
+        list->length++;
+    }
     return 0;
 }
 
@@ -103,7 +110,6 @@ void *list_popfirst(list_t *list) {
     void *tmp_item = tmp_node->item;
     list->head = list->head->next;
     free(tmp_node);
-    tmp_node = NULL;
     list->length--;
     return tmp_item;
 } 
